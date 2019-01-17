@@ -26,4 +26,18 @@ gtddrug3<-merge(gtddrug2, baad, by.x="gname", by.y="group")
 CINC<-read.csv("NMC_5_0.csv")
 gtddrug4<-merge(gtddrug3,CINC, by.x=c("masterccode", "iyear"), by.y= c("ccode","year"))
 
-summary(gtddrug4)
+##Polity data merge
+polity<-read.csv("p4_v2017.csv")
+gtddrug5<-merge(gtddrug4,polity, by.x=c("masterccode", "iyear"), by.y= c("ccode","year"))
+
+gtddrug5$democracy
+gtddrug5$democracy[gtddrug5$polity2>=7]<-1
+gtddrug5$democracy[is.na(gtddrug5$democracy)]<-0
+
+#Subset
+drugdata2<-subset(gtddrug5, select = c("gname","iyear","imonth","eventid",
+                                       "Country","democracy",
+                                       "Network.Connections","Territory","statespond",
+                                       "Drug1","Plant1","Plant2","Harvest1","Harvest2","Harvest3","narcotics" ))
+names(drugdata2)[names(drugdata2) == 'eventid'] <- 'numattack'
+onlydruggroups<-subset(drugdata2, drugdata2$narcotics==1)
