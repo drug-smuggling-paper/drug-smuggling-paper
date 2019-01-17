@@ -9,8 +9,12 @@ Afghanistan_1974$TAVG[Afghanistan_1974$TAVG==-9999]<-NA
 Afghanistan_1974<-aggregate(TAVG~DATE, data=Afghanistan_1974, FUN= mean)
 Afghanistan_1974$month<-substr(Afghanistan_1974$DATE, 5, 6)
 
+
+
+##Opium
 Opium<-Afghanistan_1974
 Opium$Drug<-rep("Opium")
+
 Opium$htemp<-rep(74.3)
 Opium$ltemp<-rep(42.08)
 
@@ -51,3 +55,9 @@ Cocaine$drug<-rep("Cocaine")
 Afghanistan_1974<-rbind(Opium, Marijuana, Cocaine)
 Afghanistan_1974$country<-rep("Afghanistan")
 Afghanistan_1974$year<-rep(1974)
+=======
+
+Opium$country<-rep("Afghanistan")
+Opium$year<-rep(1974)
+Opium$drug<-rep("Opium")
+>>>>>>> d2ec24650a13222d83618d4b8a88de3b299681c3
