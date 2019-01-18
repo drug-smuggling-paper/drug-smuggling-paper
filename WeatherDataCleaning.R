@@ -55,9 +55,4 @@ Cocaine$drug<-rep("Cocaine")
 Afghanistan_1974<-rbind(Opium, Marijuana, Cocaine)
 Afghanistan_1974$country<-rep("Afghanistan")
 Afghanistan_1974$year<-rep(1974)
-=======
 
-Opium$country<-rep("Afghanistan")
-Opium$year<-rep(1974)
-Opium$drug<-rep("Opium")
->>>>>>> d2ec24650a13222d83618d4b8a88de3b299681c3
