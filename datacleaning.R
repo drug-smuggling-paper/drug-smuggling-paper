@@ -5,7 +5,6 @@ library(data.table)
 library(readr)
 drugdata<-read.csv("drugdata.csv")
 gtd<-fread("globalterrorismdb.csv")
-
 #aggreagte gtd
 gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
 
@@ -40,4 +39,12 @@ drugdata2<-subset(gtddrug5, select = c("gname","iyear","imonth","eventid",
                                        "Network.Connections","Territory","statespond",
                                        "Drug1","Plant1","Plant2","Harvest1","Harvest2","Harvest3","narcotics" ))
 names(drugdata2)[names(drugdata2) == 'eventid'] <- 'numattack'
-onlydruggroups<-subset(drugdata2, drugdata2$narcotics==1)
+
+
+#merge drug temp data
+temp<-read.csv("idealdrugtemp.csv")
+mydata<-merge(drugdata2,temp, by.x=c("iyear","Country"), by.y=c("year","cname") )
+
+#write new csv file for merged data
+
+write.csv(mydata, "drugsandterrorism.csv")
