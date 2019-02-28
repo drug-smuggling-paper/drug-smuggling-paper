@@ -1,0 +1,1 @@
+"MONTH" "YEAR" "ave_precip_mo" "ave_mo_t" "opium_t" "mj_t" "coca_t" "fips" "year"
