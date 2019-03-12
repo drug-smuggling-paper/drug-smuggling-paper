@@ -1,0 +1,39 @@
+Group,Abriviation,GTD name,Network Connections,Territory,Country,Crop,Drug1,Supplier,Plant1,Plant2,Harvest1,Harvest2,Harvest3,Harvest4,IdealHighTemp,IdealLowTemp,IdealHighHumid,IdealLowHumid
+Continuity Irish Republican Army,CIRA,Continuity Irish Republican Army (CIRA),1,0,Ireland,,,,,,,,,,,,,
+Orange Volunteers,OV,Orange Volunteers (OV),3,0,Ireland,,,,,,,,,,,,,
+Red Hand Defenders,RHD,Red Hand Defenders (RHD),4,0,Ireland,,,,,,,,,,,,,
+Irish National Liberation Army,INLA,Irish National Liberation Army (INLA),1,0,Ireland,,,,,,,,,,,,,
+Communist Workers Movement ,,,0,0,,,,,,,,,,,,,,
+DHKP-C ,,Devrimici Halk Kurtulus Cephesi (DHKP/C),5,0,Turkey,,,,,,,,,,,,,
+Andres Castro United Front ,FUAC,Andres Castro United Front ,0,0,Nicaragua,,Cocaine,Revolutionary Armed Forces of Colombia (FARC),,,,,,,,,,
+Shining Path ,,Shining Path (SL),0,1,Peru,Coca,Cocaine,,12,1,3,6,10,11,25,18,90,80
+Real Irish Republican Army,RIRA,Real Irish Republican Army (RIRA),2,0,Ireland,,,,,,,,,,,,,
+Ulster Volunteer Force,UVF,Ulster Volunteer Force (UVF),3,0,Ireland,,,,,,,,,,,,,
+Loyalist Volunteer Force,LVF,Loyalist Volunteer Forces (LVF),3,0,Ireland,,,,,,,,,,,,,
+Basque Fatherland and Freedom ,ETA,Basque Separatists,3,0,Spain,,Cocaine,Revolutionary Armed Forces of Colombia (FARC),,,,,,,,,,
+Islamic Movement of Uzbekistan,IMU,Islamic Movement of Uzbekistan (IMU) ,2,1,Uzbekistan,,Opium,Taliban,,,,,,,,,,
+East Turkistan Liberation Organization ,,East Turkistan Liberation Organization ,1,0,China,,Opium,Afganistan,,,,,,,,,,
+Lashkar-e-Taiba ,LeT,Lashkar-e-Taiba (LeT),8,0,Pakistan,,Opium,,10,,5,,,,20,16,,
+Democratic Karen Buddhist Army ,DKBA,Democratic Karen Buddhist Army (DKBA),0,1,Myanmar,,,,,,,,,,,,,
+Abu Sayyaf Group ,ASG,Abu Sayyaf Group (ASG),4,1,Phillippines,,Meth,,,,,,,,,,,
+Jemaah Islamiya,JI,Jemaah Islamiya (JI),2,1,,,,,,,,,,,,,,
+National Liberation Army (Columbia),,National Liberation Army of Colombia (ELN),8,1,Columbia,Coca,Cocaine,,12,,3,6,10,,25,18,90,80
+Self-Defense Groups of Cordoba and Uraba ,ACCU,Peasant Self-Defense Group (ACCU),2,1,Columbia,Coca,Cocaine,,12,,3,6,10,,25,18,90,80
+United Self-Defense Forces of Colombia ,AUC,United Self Defense Units of Colombia (AUC),2,0,Columbia,Coca,Cocaine,,12,,3,6,10,,25,18,90,80
+Ulster Defense Association/Ulster Freedom Fighters ,,Ulster Freedom Fighters (UFF) ,4,0,Ireland,,,,,,,,,,,,,
+Kosovo Liberation Army ,KLA,Kosovo Liberation Army (KLA),0,0,Kosovo,,Opium,,,,,,,,,,,
+Kurdistan Workers’ Party ,PKK,Kurdistan Workers' Party (PKK),10,0,Turkey,Marijuana,Marijuana,,3,4,10,,,,30,24,60,40
+Taliban,,Taliban,5,1,Afghanistan,Poppy,Opium,,10,,5,,,,20,16,,
+Communist Party of India-Maoist ,CPI-M,Communist Party of India - Maoist (CPI-Maoist),4,1,India,Poppy,Opium,,9,10,2,3,,,20,16,,
+National Democratic Front of Bodoland,NDFB,National Democratic Front of Bodoland (NDFB),3,0,India,,,,,,,,,,,,,
+National Socialist Council of Nagaland-Isak-Muivah ,NSCN-IM,National Socialist Council of Nagaland-Isak-Muivah (NSCN-IM),7,0,India,,,,,,,,,,,,,
+Al Qaeda ,,Al-Qaida in the Arabian Peninsula (AQAP),33,1,,,Opium,,9,10,2,3,,,20,16,,
+Al Qaeda ,,Al-Qaida in the Islamic Maghreb (AQIM),33,1,,,Cocaine,Revolutionary Armed Forces of Colombia (FARC),,,,,,,,,,
+Liberation Tigers of Tamil Eelam,LTTE,Liberation Tigers of Tamil Eelam (LTTE),0,1,Sri Lanka,,,,,,,,,,,,,
+Communist Party of Nepal-Maoists,CPN-M,Communist Party of Nepal - Maoist (CPN-Maoist-Chand),4,1,Nepal,,,,,,,,,,,,,
+Maras Salvatruchas ,MS-13,,0,0,United States,,,,,,,,,,,,,
+Revolutionary Armed Forces of Colombia,FARC,Revolutionary Armed Forces of Colombia (FARC),6,1,Columbia,Coca,Cocaine,,12,,3,6,10,,25,18,90,80
+Russian National Bolshevist Party ,,,0,0,Russia,,,,,,,,,,,,,
+Hezbollah ,,Hezbollah ,4,1,Lebanon,Marijuana,Marijuana,,5,,10,,,,30,24,60,40
+Hizb-i-Islami,,Hizb-I-Islami,,,Afghanistan,Poppy,Opium,,10,,5,,,,20,16,,
+,MFDC,Movement of Democratic Forces of Casamance,,,Senegal,Marijuana,Marijuana,,1,2,6,,,,30,24,60,40
