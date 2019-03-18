@@ -11,10 +11,10 @@ library(parallel)
 ##Get names of Stations
 #Each File has all data for a single wheather station
 
+stationfiles<-list.files("./ghcnd_all/")
 
-
-#stationfile<-stationfiles[1]
-#sname<- str_extract(stationfile,"\\D+")  %>% str_remove("_") 
+stationfile<-stationfiles[1]
+sname<- str_extract(stationfile,"\\D+")  %>% str_remove("_") 
 
 ## Function For loading and Subsetting data
 
@@ -32,16 +32,20 @@ cleanonecounry<-function(onecountryfiles) {
   mj_lt<-42.8
   coca_ht<-77
   coca_lt<-64.4
+  
+  
   d<-read.dly(paste("./ghcnd_all/",onecountryfiles,sep="")) %>%
-  subset(select=c("YEAR","MONTH","DAY","PRCP.VALUE","TMAX.VALUE","TMIN.VALUE"))%>%
+  mutate(isday=rep(1))%>%
+  subset(select=c("YEAR","MONTH","DAY","PRCP.VALUE","TMAX.VALUE","TMIN.VALUE","isday"))%>%
   na.omit()%>%
   mutate(TAVG= (TMIN.VALUE+TMAX.VALUE)/2)%>%
-  group_by(MONTH, YEAR) %>%
+  group_by(MONTH, YEAR)%>%
   summarise(ave_mo_t=mean(TAVG ,na.rm=TRUE), opium_t=sum(as.numeric(opium_lt <= TAVG &  TAVG<=opium_ht)),mj_t=sum(as.numeric(mj_lt <= TAVG & TAVG<=mj_ht)),
-            coca_t=sum(as.numeric(coca_lt <= TAVG &  TAVG<=coca_ht)) ) %>% 
+            coca_t=sum(as.numeric(coca_lt <= TAVG &  TAVG<=coca_ht)), days=sum(as.numeric(isday)) )%>%
+  subset(days>28)%>%
   ungroup %>%
-  mutate(fips= substr(onecountryfiles,1,2), year=YEAR)
-return(d)
+  mutate(fips= substr(onecountryfiles,1,2), year=YEAR)%>%
+  return(d)
 }
 ####I did not aggregate data in this step because many countries have several stations
 
