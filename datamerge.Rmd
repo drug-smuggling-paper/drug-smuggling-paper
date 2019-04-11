@@ -1,0 +1,105 @@
+---
+title: "datamerge"
+author: "Olga Chyzh"
+date: "March 11, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE,warning = FALSE,fig.cap = "...")
+```
+
+Load libraries:
+```{r}
+rm(list=ls())
+library(data.table)
+library(tidyverse)
+library(magrittr)
+
+```
+
+#Weather data:
+```{r}
+myfiles<-list.files("./Data/countryfiles/")
+
+agg_stations<-function(countryfiles) {
+d<-read.table(paste0("./Data/countryfiles/",countryfiles), header=TRUE)
+#%>% 
+#  group_by(MONTH, YEAR) %>% 
+#  summarise(ave_precip_mo=mean(ave_precip_mo, na.rm=TRUE), ave_mo_t=mean(ave_mo_t,na.rm=TRUE), opium_t=mean(opium_t,na.rm=TRUE),mj_t=mean(mj_t,na.rm=TRUE), coca_t=mean(coca_t,na.rm=TRUE), fips=first(fips)) %>%
+#  ungroup
+return(d)
+}
+
+weatherdata<-do.call(rbind,lapply(myfiles,agg_stations))
+weatherdata<-weatherdata[!is.na(weatherdata$ave_precip_mo) | !is.na(weatherdata$ave_mo_t),]
+weatherdata
+
+
+
+```
+
+
+#Merge GTD data with drug data:
+```{r}
+gtd<-fread("Data/globalterrorismdb.csv")
+#aggreagte gtd
+#gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
+gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% 
+  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown)
+
+#Open drug data:
+drugdata<-read.csv("drugdata.csv")
+
+#merge
+drugdata$narcotics<-1
+gtddrug<-merge(gtdgroup,drugdata, by.x="gname", by.y="GTD.name",all = TRUE)
+gtddrug$narcotics[is.na(gtddrug$narcotics)]<-0
+
+```
+
+
+drugdata<-read.csv("drugdata.csv")
+
+#merge
+drugdata$narcotics<-1
+gtddrug<-merge(gtdgroup,drugdata, by.x="gname", by.y="GTD.name",all = TRUE)
+gtddrug$narcotics[is.na(gtddrug$narcotics)]<-0
+
+#subset
+gtddrug2<-subset(gtddrug, select=c("gname","iyear","imonth","eventid","Network.Connections","Territory","Country","Drug1",
+                                   "Plant1","Plant2","Harvest1","Harvest2","Harvest3","narcotics"))
+
+#baad merge
+baad<- read_delim("BAAD_1_Lethality_Data.tab", "\t", escape_double = FALSE, trim_ws = TRUE)
+gtddrug3<-merge(gtddrug2, baad, by.x="gname", by.y="group")
+
+#CINC merge
+CINC<-read.csv("NMC_5_0.csv")
+gtddrug4<-merge(gtddrug3,CINC, by.x=c("masterccode", "iyear"), by.y= c("ccode","year"))
+
+##Polity data merge
+polity<-read.csv("p4_v2017.csv")
+gtddrug5<-merge(gtddrug4,polity, by.x=c("masterccode", "iyear"), by.y= c("ccode","year"))
+
+gtddrug5$democracy
+gtddrug5$democracy[gtddrug5$polity2>=7]<-1
+gtddrug5$democracy[is.na(gtddrug5$democracy)]<-0
+
+#Subset
+drugdata2<-subset(gtddrug5, select = c("gname","iyear","imonth","eventid",
+                                       "Country","democracy",
+                                       "Network.Connections","Territory","statespond",
+                                       "Drug1","Plant1","Plant2","Harvest1","Harvest2","Harvest3","narcotics" ))
+names(drugdata2)[names(drugdata2) == 'eventid'] <- 'numattack'
+
+
+#merge drug temp data
+temp<-read.csv("idealdrugtemp.csv")
+mydata<-merge(drugdata2,temp, by.x=c("iyear","Country"), by.y=c("year","cname") )
+
+#write new csv file for merged data
+
+write.csv(mydata, "drugsandterrorism.csv")
