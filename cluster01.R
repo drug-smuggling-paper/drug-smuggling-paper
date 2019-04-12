@@ -7,10 +7,10 @@
 #library(tidyverse)
 #library(magrittr)
 library(parallel)
+getwd()
 
 mk_worker<-function(countrylist, stationfiles) {
   force(stationfiles)
-  
   cleanonecounry<-function(onecountryfiles) {
     
     opium_ht<-23.5
@@ -19,7 +19,7 @@ mk_worker<-function(countrylist, stationfiles) {
     mj_lt<-6
     coca_ht<-25
     coca_lt<-18
-    d<-read.dly(paste("../ghcnd_all/",onecountryfiles,sep=""))   %>%
+    d<-read.dly(paste("./ghcnd_all/",onecountryfiles,sep=""))   %>%
       filter(YEAR>=1970) %>%
       subset(select=c("YEAR","MONTH","DAY","PRCP.VALUE","TMAX.VALUE","TMIN.VALUE"))%>%
       mutate(TAVG= (TMIN.VALUE+TMAX.VALUE)/2, opium_t=as.numeric(opium_lt <= TAVG &  TAVG <= opium_ht),mj_t=as.numeric(mj_lt <= TAVG & TAVG<=mj_ht),
@@ -31,33 +31,27 @@ mk_worker<-function(countrylist, stationfiles) {
     return(d)
   }
   
-  #countrylist="AG"
-  #onecountryfiles<-stationfiles[countrylist==substr(stationfiles,1, 2)] #select all files for the first country
-  #d<-do.call(rbind, lapply(onecountryfiles, cleanonecounry))
   
   
   wk_run<-function(countrylist=countrylist){
     onecountryfiles<-stationfiles[countrylist==substr(stationfiles,1, 2)] #select all files for the first country
-    d<-do.call(rbind, lapply(onecountryfiles, cleanonecounry))  
+    d<-do.call(rbind, lapply(onecountryfiles, cleanonecounry))
     d <-d %>% 
       group_by(MONTH, YEAR) %>% 
       summarise(ave_precip_mo=mean(ave_precip_mo, na.rm=TRUE), ave_mo_t=mean(ave_mo_t,na.rm=TRUE), opium_t=mean(opium_t,na.rm=TRUE),mj_t=mean(mj_t,na.rm=TRUE), coca_t=mean(coca_t,na.rm=TRUE), fips=first(fips)) %>%
-      ungroup   
-    write.table(d, paste0(countrylist,".txt"), row.names=FALSE)
+      ungroup
+    
+    write.table(d, paste0("./weather/",countrylist,".txt"), row.names=FALSE)
     return(d)
   }
-  
-  #wk_run(countrylist)
-  #lapply(countrylist[1],wk_run)
   
   return(wk_run)
 }
 
-#mk_worker(stationfiles=stationfiles, countrylist=countrylist[1])
-
-stationfiles<-list.files("../ghcnd_all/") #Get a list of filenames in the folder
+stationfiles<-list.files("./ghcnd_all/") #Get a list of filenames in the folder
 countrylist<-substr(stationfiles,1, 2) #get a list of country identifiers
 countrylist<-unique(countrylist) #get a vector of unique identifiers for each country
+countrylist
 
 myt<-proc.time()[3] #Start the timer
 parallelCluster <- parallel::makeCluster(20)
@@ -67,7 +61,7 @@ clusterEvalQ(parallelCluster, {
   library(VFS)
   library(tidyverse)
 })
-parallel::parLapplyLB(parallelCluster,countrylist, mk_worker(stationfiles=stationfiles))
+parallel::parLapply(parallelCluster,countrylist, mk_worker(stationfiles=stationfiles))
 #Stop cluster:
 if(!is.null(parallelCluster)) {
   parallel::stopCluster(parallelCluster)
