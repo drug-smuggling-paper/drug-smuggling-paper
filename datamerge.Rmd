@@ -59,7 +59,10 @@ gtd<-gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_a
   mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown)
 
 #Start with a blank group-month-year dataset:
-gr_dates<-gtd %>% select(gname, imonth, iyear)  %>% mutate(date=paste(imonth,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(gname) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
+gr_dates<-gtd %>% select(gname, imonth, iyear)  %>% mutate (month=imonth) 
+gr_dates$month[gr_dates$month==0]<-6 
+
+gr_dates<- gr_dates %>% mutate(date=paste(month,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(gname) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
 
 mk_data<-function(gr_dates ) {
   gr_dates<-as.data.frame(gr_dates)
@@ -75,7 +78,7 @@ return(cbind.data.frame(group=group,date=dates))
 #mk_data(gr_dates)
 
 gr_dates <- as.list(as.data.frame(t(gr_dates)))
-mydata<-do.call(rbind,lapply(gr_dates[12:14],mk_data))
+mydata<-do.call(rbind,lapply(gr_dates,mk_data))
 
 #Open drug data:
 drugdata<-read.csv("drugdata.csv")
