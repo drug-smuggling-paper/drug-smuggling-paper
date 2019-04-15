@@ -55,15 +55,27 @@ weatherdata
 gtd<-fread("Data/globalterrorismdb.csv")
 #aggreagte gtd
 #gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
-gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% 
+gtd<-gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% 
   mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown)
 
 #Start with a blank group-month-year dataset:
-gtd %>% select(gname, imonth, iyear)  %>% mutate(date=paste(imonth,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(gname) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
+gr_dates<-gtd %>% select(gname, imonth, iyear)  %>% mutate(date=paste(imonth,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(gname) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
 
-seq(as.Date("1989/01/01"), as.Date("1992/03/01"), by="month")
+mk_data<-function(gr_dates ) {
+  gr_dates<-as.data.frame(gr_dates)
+  group=gr_dates[1,1]
+  st_date=as.Date(gr_dates[2,1])
+  end_date=as.Date(gr_dates[3,1])
+dates<-seq(st_date,end_date, by="month")
+return(cbind.data.frame(group=group,date=dates))
+}
 
-mydata<-expand.grid(group=gtd$gname,year=c(1970:2017),month=c(1:12))
+#gr_dates <- as.list(as.data.frame(t(gr_dates)))
+#gr_dates<-gr_dates[1]
+#mk_data(gr_dates)
+
+gr_dates <- as.list(as.data.frame(t(gr_dates)))
+mydata<-do.call(rbind,lapply(gr_dates[12:14],mk_data))
 
 #Open drug data:
 drugdata<-read.csv("drugdata.csv")
