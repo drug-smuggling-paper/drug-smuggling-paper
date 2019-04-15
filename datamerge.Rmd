@@ -89,7 +89,7 @@ drugdata<-read.csv("drugdata.csv")
 
 #merge
 drugdata$narcotics<-1
-mydata<-left_join(gtd,drugdata, by=c("gname"="GTD.name"))
+mydata<-left_join(mydata,drugdata, by=c("group"="GTD.name"))
 mydata$narcotics[is.na(mydata$narcotics)]<-0
 
 ```
