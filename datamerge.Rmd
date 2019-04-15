@@ -56,7 +56,7 @@ gtd<-fread("Data/globalterrorismdb.csv")
 #aggreagte gtd
 #gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
 gtd<-gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% 
-  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown)
+  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown, incident=1)
 
 #Start with a blank group-month-year dataset:
 gr_dates<-gtd %>% select(gname, imonth, iyear)  %>% mutate (month=imonth) 
@@ -79,6 +79,10 @@ return(cbind.data.frame(group=group,date=dates))
 
 gr_dates <- as.list(as.data.frame(t(gr_dates)))
 mydata<-do.call(rbind,lapply(gr_dates,mk_data))
+mydata <- mydata %>% mutate(month=month(date), year=year(date))
+
+mydata<-left_join(mydata, gtd, by=c("group"="gname","month"="imonth", "year"="iyear")) 
+mydata$incident[is.na(mydata$incident)]<-0
 
 #Open drug data:
 drugdata<-read.csv("drugdata.csv")
