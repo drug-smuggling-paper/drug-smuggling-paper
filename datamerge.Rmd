@@ -27,10 +27,6 @@ myfiles<-list.files("./Data/countryfiles/")
 
 agg_stations<-function(countryfiles) {
 d<-read.table(paste0("./Data/countryfiles/",countryfiles), header=TRUE)
-#%>% 
-#  group_by(MONTH, YEAR) %>% 
-#  summarise(ave_precip_mo=mean(ave_precip_mo, na.rm=TRUE), ave_mo_t=mean(ave_mo_t,na.rm=TRUE), opium_t=mean(opium_t,na.rm=TRUE),mj_t=mean(mj_t,na.rm=TRUE), coca_t=mean(coca_t,na.rm=TRUE), fips=first(fips)) %>%
-#  ungroup
 return(d)
 }
 
@@ -43,7 +39,11 @@ mynames<-mynames %>% unite(countryname,c("COUNTRY","X","X.1","X.2","X.3","X.4","
 mynames
 
 weatherdata<- weatherdata %>% left_join(mynames,by=c("fips"="FIPS"))
-weatherdata
+weatherdata$countryname[weatherdata$countryname=="Unitedkingdom"]<-"United Kingdom"
+weatherdata$countryname[weatherdata$countryname=="Unitedstates"]<-"United States of America"
+weatherdata$countryname[weatherdata$countryname=="Saudiarabia"]<-"Saudi Arabia"
+
+
 #write.csv(weatherdata, "weatherdata.csv", row.names=FALSE)
 
 
@@ -53,16 +53,27 @@ weatherdata
 #Merge GTD data with drug data:
 ```{r}
 gtd<-fread("Data/globalterrorismdb.csv")
+gtd$gcountry<-NA
+gtd$gcountry[gtd$INT_LOG==0]<-gtd$country[gtd$INT_LOG==0]
+gtd$gcountry_txt[gtd$INT_LOG==0]<-gtd$country_txt[gtd$INT_LOG==0]
+gtd$gname[gtd$gname=="Mujahedin Kompak"]<-"Mujahideen Kompak"
+#gtd<-filter(gtd, gtd$INT_LOG!=-9)
+#write.csv(gtd,"Data/gtd.csv", row.names=FALSE)
 #aggreagte gtd
 #gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
-gtd<-gtd %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% 
-  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown, incident=1)
+gtd<-gtd %>% filter(imonth!=0 & is.finite(imonth)) %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% mutate(incident=1)
+
+#BAAD merge
+baad<- read_delim("Data/BAAD_1_Lethality_Data.tab", "\t", escape_double = FALSE, trim_ws = TRUE)
+baad$group[baad$group=="Mujahideen KOMPAK"]<-"Mujahideen Kompak"
+mydata<-left_join(baad,gtd,by=c("group"="gname"))
+mydata<-mydata %>% filter(!is.na(incident))
+
 
 #Start with a blank group-month-year dataset:
-gr_dates<-gtd %>% select(gname, imonth, iyear)  %>% mutate (month=imonth) 
-gr_dates$month[gr_dates$month==0]<-6 
+gr_dates<-mydata %>% select(group, imonth, iyear) 
 
-gr_dates<- gr_dates %>% mutate(date=paste(month,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(gname) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
+gr_dates<- gr_dates %>% mutate(date=paste(imonth,"01",iyear, sep="/"))  %>% mutate(date=as.Date(date, "%m/%d/%Y")) %>% group_by(group) %>% summarise(first_moyr=min(date), last_moyr=max(date)) %>% ungroup 
 
 mk_data<-function(gr_dates ) {
   gr_dates<-as.data.frame(gr_dates)
@@ -78,10 +89,10 @@ return(cbind.data.frame(group=group,date=dates))
 #mk_data(gr_dates)
 
 gr_dates <- as.list(as.data.frame(t(gr_dates)))
-mydata<-do.call(rbind,lapply(gr_dates,mk_data))
-mydata <- mydata %>% mutate(month=month(date), year=year(date))
+myframe<-do.call(rbind,lapply(gr_dates,mk_data))
+myframe <- myframe %>% mutate(month=month(date), year=year(date))
 
-mydata<-left_join(mydata, gtd, by=c("group"="gname","month"="imonth", "year"="iyear")) 
+mydata<-left_join(myframe, mydata, by=c("group"="group","month"="imonth", "year"="iyear")) 
 mydata$incident[is.na(mydata$incident)]<-0
 
 #Open drug data:
@@ -92,8 +103,28 @@ drugdata$narcotics<-1
 mydata<-left_join(mydata,drugdata, by=c("group"="GTD.name"))
 mydata$narcotics[is.na(mydata$narcotics)]<-0
 
+mydata <- mydata %>% group_by(group) %>% fill(mastertccode3606,statespond,cowmastercountry,masterccode,fatalities19982005,OrgAge,ordsize,terrStrong,degree,ContainRelig,
+        ContainEthno,LeftNoReligEthno,PureRelig,PureEthno,ReligEthno,ContainRelig2,ContainEthno2,Islam)
+
+mydata$`Armed Assault`<-replace_na(mydata$`Armed Assault`, 0) 
+mydata$Assassination<-replace_na(mydata$Assassination, 0) 
+mydata$`Bombing/Explosion`<-replace_na(mydata$`Bombing/Explosion`, 0)
+mydata$`Facility/Infrastructure Attack`<-replace_na(mydata$`Facility/Infrastructure Attack`, 0)
+mydata$Hijacking<-replace_na(mydata$Hijacking, 0)
+mydata$`Hostage Taking (Barricade Incident)`<-replace_na(mydata$`Hostage Taking (Barricade Incident)`, 0)
+mydata$`Hostage Taking (Kidnapping)`<-replace_na(mydata$`Hostage Taking (Kidnapping)`, 0)
+mydata$`Unarmed Assault`<-replace_na(mydata$`Unarmed Assault`, 0)
+mydata$Unknown<-replace_na(mydata$Unknown, 0)
+
+mydata<-mydata %>%  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Explosion`+`Facility/Infrastructure Attack`+Hijacking+`Hostage Taking (Barricade Incident)` +`Hostage Taking (Kidnapping)`+`Unarmed Assault`+Unknown )
+
+
 ```
 
+Merge with weather data:
+```{r}
+mydata<-left_join(mydata, weatherdata, by=c("cowmastercountry"="countryname", "month"="MONTH","year"="YEAR"))
+```
 
 drugdata<-read.csv("drugdata.csv")
 
@@ -106,9 +137,7 @@ gtddrug$narcotics[is.na(gtddrug$narcotics)]<-0
 gtddrug2<-subset(gtddrug, select=c("gname","iyear","imonth","eventid","Network.Connections","Territory","Country","Drug1",
                                    "Plant1","Plant2","Harvest1","Harvest2","Harvest3","narcotics"))
 
-#baad merge
-baad<- read_delim("BAAD_1_Lethality_Data.tab", "\t", escape_double = FALSE, trim_ws = TRUE)
-gtddrug3<-merge(gtddrug2, baad, by.x="gname", by.y="group")
+
 
 #CINC merge
 CINC<-read.csv("NMC_5_0.csv")
