@@ -53,20 +53,62 @@ weatherdata$countryname[weatherdata$countryname=="Saudiarabia"]<-"Saudi Arabia"
 #Merge GTD data with drug data:
 ```{r}
 gtd<-fread("Data/globalterrorismdb.csv")
-gtd$gcountry<-NA
-gtd$gcountry[gtd$INT_LOG==0]<-gtd$country[gtd$INT_LOG==0]
-gtd$gcountry_txt[gtd$INT_LOG==0]<-gtd$country_txt[gtd$INT_LOG==0]
-gtd$gname[gtd$gname=="Mujahedin Kompak"]<-"Mujahideen Kompak"
+unique(gtd$gname[gtd$country_txt=="France"])
+
+
+#gtd$gcountry<-NA
+#gtd$gcountry[gtd$INT_LOG==0]<-gtd$country[gtd$INT_LOG==0]
+#gtd$gcountry_txt[gtd$INT_LOG==0]<-gtd$country_txt[gtd$INT_LOG==0]
+#gtd$gname[gtd$gname=="Mujahedin Kompak"]<-"Mujahideen Kompak"
 #gtd<-filter(gtd, gtd$INT_LOG!=-9)
 #write.csv(gtd,"Data/gtd.csv", row.names=FALSE)
 #aggreagte gtd
 #gtdgroup<-aggregate(eventid~gname+iyear+imonth, data=gtd, FUN=length)
+
 gtd<-gtd %>% filter(imonth!=0 & is.finite(imonth)) %>% group_by(gname, iyear, imonth, attacktype1_txt) %>% summarise(num_attacks=length(eventid)) %>% ungroup %>% spread(attacktype1_txt, num_attacks) %>% mutate(incident=1)
+
+
 
 #BAAD merge
 baad<- read_delim("Data/BAAD_1_Lethality_Data.tab", "\t", escape_double = FALSE, trim_ws = TRUE)
-baad$group[baad$group=="Mujahideen KOMPAK"]<-"Mujahideen Kompak"
-mydata<-left_join(baad,gtd,by=c("group"="gname"))
+#Correct some names:
+baad$GTD.gname<-baad$group
+baad$GTD.gname[baad$group=="05/01/1998"]<-"1 May"
+baad$GTD.gname[baad$group=="05/15/2008"]<-"May 15"
+baad$GTD.gname[baad$group=="313"]<-"313 Brigade (Syria)"
+baad$GTD.gname[baad$group=="Mujahideen KOMPAK"]<-"Mujahideen Kompak"
+baad$GTD.gname[baad$group=="White Legion"]<-"White Legion (Ecuador)"
+baad$GTD.gname[baad$group=="United Self-Defense Forces of Colombia (AUC)"]<-"United Self Defense Units of Colombia (AUC)"
+baad$GTD.gname[baad$group=="United Kuki Liberation Front (UKLF)"]<-"United Kuki Liberation Front (UKLF) - India"
+baad$GTD.gname[baad$group=="UNITA"]<-"National Union for the Total Independence of Angola (UNITA)"
+baad$GTD.gname[baad$group=="Underground Government of the Free Democratic People of Laos"]<-"Free Democratic People's Government of Laos"
+baad$GTD.gname[baad$group=="Ummah Liberation Army (ULA)"]<-"Ummah Liberation Army"
+baad$GTD.gname[baad$group=="Ulster Defence Association/Ulster Freedom Fighters"]<-"Ulster Freedom Fighters (UFF)"
+baad$GTD.gname[baad$group=="Turkish People's Liberation Front (TPLF)"]<-"Turkish People's Liberation Front (TPLF)(THKP-C)"
+baad$GTD.gname[baad$group=="Tupamaro Revolutionary Movement - January 23"]<-"Tupamaro Revolutionary Movement"
+baad$GTD.gname[baad$group=="Tupac Amaru Revolutionary Movement"]<-"Tupac Amaru Revolutionary Movement (MRTA)"
+baad$GTD.gname[baad$group=="Totally Anti-War Group (ATAG)"]<-"Association Totalement Anti-Guerre (ATAG)"
+baad$GTD.gname[baad$group=="TKP/ML-TIKKO"]<-"Turkish Communist Party/Marxist (TKP-ML)"
+baad$GTD.gname[baad$group=="The National Anti-Corruption Front"]<-"National Anti-Corruption Front (FNA)"
+baad$GTD.gname[baad$group=="The Holders of the Black Banners"]<-"Holders of the Black Banners"
+baad$GTD.gname[baad$group=="Justice Army of the Defenseless People"]<-"Justice Army for Defenseless Peoples"
+baad$GTD.gname[baad$group=="Revolutionary Armed Forces of the People (FARP)"]<-"Fuerzas Armadas Revolucionarias del Pueblo (FARP)"
+baad$GTD.gname[baad$group=="Andres Castro United Front (FUAC)"]<-"Andres Castro United Front"
+baad$GTD.gname[baad$group=="April 19 Movement"]<-"M-19 (Movement of April 19)"
+baad$GTD.gname[baad$group=="Guevarista Revolutionary Army (ERG)"]<-"Ejercito Revolucionario Guevarista (Guevarist Revolutionary Army)"
+baad$GTD.gname[baad$group=="National Liberation Army (Colombia)"]<-"National Liberation Army of Colombia (ELN)"
+baad$GTD.gname[baad$group=="People's Revolutionary Army (Colombia)"]<-"People's Revolutionary Army (ERP)"
+baad$GTD.gname[baad$group=="Popular Liberation Army"]<-"Popular Liberation Army (EPL)"
+baad$GTD.gname[baad$group=="Self-Defense Groups of Cordoba and Uraba (ACCU)"]<-"Peasant Self-Defense Group (ACCU)"
+baad$GTD.gname[baad$group=="Bolivarian Liberation Forces (FBL)"]<-"Bolivarian Army of Liberation"
+baad$GTD.gname[baad$group=="Shining Path"]<-"Shining Path (SL)"
+baad$GTD.gname[baad$group=="Movement of the Revolutionary Left"]<-"Movement of the Revolutionary Left (MIR) (Chile)"
+baad$GTD.gname[baad$group=="Catholic Reaction Force (CRF)"]<-"Catholic Reaction Force"
+baad$GTD.gname[baad$group=="Loyalist Volunteer Force (LVF)"]<-"Loyalist Volunteer Forces (LVF)"
+baad$GTD.gname[baad$group=="Accolta Nazinuale Corsa"]<-"Resistenza Corsa"
+baad$GTD.gname[baad$group=="Armata di Liberazione Naziunale"]<-"Armata di Liberazione Naziunale (ALN)"
+
+mydata<-left_join(baad,gtd,by=c("GTD.gname"="gname"))
 mydata<-mydata %>% filter(!is.na(incident))
 
 
@@ -104,7 +146,7 @@ mydata<-left_join(mydata,drugdata, by=c("group"="GTD.name"))
 mydata$narcotics[is.na(mydata$narcotics)]<-0
 
 mydata <- mydata %>% group_by(group) %>% fill(mastertccode3606,statespond,cowmastercountry,masterccode,fatalities19982005,OrgAge,ordsize,terrStrong,degree,ContainRelig,
-        ContainEthno,LeftNoReligEthno,PureRelig,PureEthno,ReligEthno,ContainRelig2,ContainEthno2,Islam)
+        ContainEthno,LeftNoReligEthno,PureRelig,PureEthno,ReligEthno,ContainRelig2,ContainEthno2,Islam, Harvest1, Harvest2, Harvest3,Harvest4)
 
 mydata$`Armed Assault`<-replace_na(mydata$`Armed Assault`, 0) 
 mydata$Assassination<-replace_na(mydata$Assassination, 0) 
@@ -124,6 +166,31 @@ mydata<-mydata %>%  mutate(num_attacks=`Armed Assault`+Assassination+`Bombing/Ex
 Merge with weather data:
 ```{r}
 mydata<-left_join(mydata, weatherdata, by=c("cowmastercountry"="countryname", "month"="MONTH","year"="YEAR"))
+mydata<-mydata %>% filter( !is.na(ave_mo_t))
+
+
+groups=drugdata$Group
+mygroup<-groups[1]
+mydata %>% filter(group==mygroup)
+
+
+mydata$mo_since_harvest<-0
+mydata$mo_since_harvest[mydata$month==mydata$Harvest1 | mydata$month==mydata$Harvest2 | mydata$month==mydata$Harvest3 | mydata$month==mydata$Harvest4]<-1
+
+mydata$harvest=0
+mydata$harvest[!is.na(mydata$Harvest1)  & mydata$narcotics ==1 & ((mydata$month>=mydata$Harvest1 & mydata$month<mydata$Harvest2) | is.na(mydata$Harvest2)) ]<-1
+mydata$harvest[!is.na(mydata$Harvest2) & mydata$narcotics ==1 & (mydata$month>=mydata$Harvest2 & mydata$month<mydata$Harvest3) | is.na(mydata$Harvest3) ]<-2
+mydata$harvest[!is.na(mydata$Harvest3) & mydata$narcotics ==1 & (mydata$month>=mydata$Harvest4 & mydata$month<mydata$Harvest4) | is.na(mydata$Harvest4) ]<-3
+mydata$harvest[!is.na(mydata$Harvest4) & mydata$narcotics ==1 & mydata$month>=mydata$Harvest4 & mydata$month<mydata$Harvest1 ]<-4
+
+
+
+setorder(mydata,group,date)
+
+mydata %>% group_by(group) %>% mutate(mo_since=)
+mo_since_harvest<-mydata$mo_since_harvest
+
+
 ```
 
 drugdata<-read.csv("drugdata.csv")
